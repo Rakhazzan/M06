@@ -1,6 +1,5 @@
 package com.practica;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,16 +15,10 @@ public class Llibre {
     private List<String> paraulesClau;
     private Date dataAfegit;
     private String estat;
-    private List<Valoracio> valoracions;
+    private String user;
+    private Date prestec;
 
-    // Default constructor
-    public Llibre() {
-        this.generes = new ArrayList<>();
-        this.paraulesClau = new ArrayList<>();
-        this.valoracions = new ArrayList<>();
-    }
-
-    // Getters and Setters
+    // Getters y Setters
     public String getId() {
         return id;
     }
@@ -106,53 +99,19 @@ public class Llibre {
         this.estat = estat;
     }
 
-    public List<Valoracio> getValoracions() {
-        return valoracions;
+    public String getUser() {
+        return user;
     }
 
-    public void setValoracions(List<Valoracio> valoracions) {
-        this.valoracions = valoracions;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    // Inner class for Valoracio
-    public static class Valoracio {
+    public Date getPrestec() {
+        return prestec;
+    }
 
-        private String usuariId;
-        private Integer puntuacio;
-        private String comentari;
-        private Date data;
-
-        // Getters and Setters
-        public String getUsuariId() {
-            return usuariId;
-        }
-
-        public void setUsuariId(String usuariId) {
-            this.usuariId = usuariId;
-        }
-
-        public Integer getPuntuacio() {
-            return puntuacio;
-        }
-
-        public void setPuntuacio(Integer puntuacio) {
-            this.puntuacio = puntuacio;
-        }
-
-        public String getComentari() {
-            return comentari;
-        }
-
-        public void setComentari(String comentari) {
-            this.comentari = comentari;
-        }
-
-        public Date getData() {
-            return data;
-        }
-
-        public void setData(Date data) {
-            this.data = data;
-        }
+    public void setPrestec(Date prestec) {
+        this.prestec = prestec;
     }
 }
