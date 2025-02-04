@@ -66,6 +66,7 @@ public class Usuari {
         this.historialPrestecs = historialPrestecs;
     }
 
+
     public static class HistorialPrestec {
 
         private String llibreId;
