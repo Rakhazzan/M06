@@ -1,5 +1,8 @@
 package com.practica;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -21,30 +24,74 @@ public class Menu {
                 case 1 -> {
                     System.out.print("Títol: ");
                     String titol = scanner.nextLine();
+                    System.out.print("Autor: ");
+                    String autor = scanner.nextLine();
+                    System.out.print("ISBN: ");
+                    String isbn = scanner.nextLine();
+                    System.out.print("Any de publicació: ");
+                    int anyPublicacio = scanner.nextInt(); scanner.nextLine();
+                    System.out.print("Gèneres (separats per comes): ");
+                    String generesInput = scanner.nextLine();
+                    List<String> generes = List.of(generesInput.split(","));
+                    System.out.print("Descripció: ");
+                    String descripcio = scanner.nextLine();
+                    System.out.print("Paraules clau (separades per comes): ");
+                    String paraulesInput = scanner.nextLine();
+                    List<String> paraulesClau = List.of(paraulesInput.split(","));
+                    System.out.print("Estat: ");
+                    String estat = scanner.nextLine();
+
                     Llibre nouLlibre = new Llibre();
                     nouLlibre.setTitol(titol);
+                    nouLlibre.setAutor(autor);
+                    nouLlibre.setIsbn(isbn);
+                    nouLlibre.setAnyPublicacio(anyPublicacio);
+                    nouLlibre.setGeneres(new ArrayList<>(generes));
+                    nouLlibre.setDescripcio(descripcio);
+                    nouLlibre.setParaulesClau(new ArrayList<>(paraulesClau));
+                    nouLlibre.setDataAfegit(new Date());
+                    nouLlibre.setEstat(estat);
+
                     llibreDAO.create(nouLlibre);
                     System.out.println("Llibre afegit!");
                 }
                 case 2 -> {
                     for (Llibre llibre : llibreDAO.findAll()) {
-                        System.out.println(llibre.getTitol());
+                        System.out.println(llibre.getTitol() + " - " + llibre.getAutor());
                     }
                 }
                 case 3 -> {
                     System.out.print("ID: ");
                     String id = scanner.nextLine();
                     Llibre llibre = llibreDAO.findById(id);
-                    if (llibre != null) System.out.println(llibre.getTitol());
-                    else System.out.println("No trobat!");
+                    if (llibre != null) {
+                        System.out.println("Títol: " + llibre.getTitol());
+                        System.out.println("Autor: " + llibre.getAutor());
+                        System.out.println("ISBN: " + llibre.getIsbn());
+                        System.out.println("Any de publicació: " + llibre.getAnyPublicacio());
+                        System.out.println("Gèneres: " + llibre.getGeneres());
+                        System.out.println("Descripció: " + llibre.getDescripcio());
+                        System.out.println("Paraules clau: " + llibre.getParaulesClau());
+                        System.out.println("Estat: " + llibre.getEstat());
+                    } else {
+                        System.out.println("No trobat!");
+                    }
                 }
                 case 4 -> {
                     System.out.print("ID: ");
                     String idUpdate = scanner.nextLine();
                     System.out.print("Nou títol: ");
                     String nouTitol = scanner.nextLine();
+                    System.out.print("Nou autor: ");
+                    String nouAutor = scanner.nextLine();
+                    System.out.print("Nou estat: ");
+                    String nouEstat = scanner.nextLine();
+
                     Llibre llibreUpdate = new Llibre();
                     llibreUpdate.setTitol(nouTitol);
+                    llibreUpdate.setAutor(nouAutor);
+                    llibreUpdate.setEstat(nouEstat);
+
                     llibreDAO.update(idUpdate, llibreUpdate);
                     System.out.println("Llibre actualitzat!");
                 }
