@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class Menu {
     public static void mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
-        MongoDBConnectionManager.LlibreDAO llibreDAO = new MongoDBConnectionManager.LlibreDAO("llibres");
+        MongoDBConnectionManager.llibreDAO llibreDAO = new MongoDBConnectionManager.llibreDAO("llibres");
 
         while (true) {
             System.out.println("1. Afegir llibre");
@@ -16,7 +16,8 @@ public class Menu {
             System.out.println("3. Cercar per ID");
             System.out.println("4. Actualitzar llibre");
             System.out.println("5. Eliminar llibre");
-            System.out.println("6. Sortir");
+            System.out.println("6. Cercar per data");  // Nueva opción
+            System.out.println("7. Sortir");
             System.out.print("Opció: ");
             int opcio = scanner.nextInt(); scanner.nextLine();
 
@@ -102,8 +103,27 @@ public class Menu {
                     System.out.println("Llibre eliminat!");
                 }
                 case 6 -> {
-                    System.out.println("Sortint...");
+                    System.out.print("📅 Introdueix la data (format: YYYY-MM-DD): ");
+                    String dataStr = scanner.nextLine();
+
+                    List<Llibre> llibres = llibreDAO.findByDate(dataStr);
+
+                    if (llibres.isEmpty()) {
+                        System.out.println("❌ No s'han trobat llibres per aquesta data.");
+                    } else {
+                        System.out.println("📚 Llibres trobats:");
+                        for (Llibre llibre : llibres) {
+                            System.out.println("Títol: " + llibre.getTitol());
+                            System.out.println("Autor: " + llibre.getAutor());
+                            System.out.println("Data afegit: " + llibre.getDataAfegit());
+                            System.out.println("------------------------");
+                        }
+                    }
+                }
+                case 7 -> {
+                    System.out.println("👋 Sortint...");
                     scanner.close();
+                    MongoDBConnectionManager.closeConnection();
                     return;
                 }
                 default -> System.out.println("Opció no vàlida");

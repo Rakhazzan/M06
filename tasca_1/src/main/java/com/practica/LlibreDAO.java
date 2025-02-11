@@ -10,7 +10,7 @@ public class LlibreDAO {
     private static MongoCollection<Document> collection;
 
     public LlibreDAO(String collectionName) {
-        LlibreDAO.collection = MongoDBConnectionManager.getDatabase().getCollection(collectionName);  // ✅ Correcto
+        LlibreDAO.collection = MongoDBConnectionManager.getDatabase().getCollection(collectionName);
     }
 
     public String create(Llibre llibre) {
@@ -32,5 +32,10 @@ public class LlibreDAO {
 
     public List<Document> findAll() {
         return collection.find().into(new ArrayList<>());
+    }
+    public static List<Document> findByDate(String dateStr) {
+        Document query = new Document("dataAfegit", 
+            new Document("$regex", "^" + dateStr));
+        return collection.find(query).into(new ArrayList<>());
     }
 }

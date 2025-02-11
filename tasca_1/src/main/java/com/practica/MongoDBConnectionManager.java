@@ -22,39 +22,47 @@ public class MongoDBConnectionManager {
     private static MongoClient mongoClient;
     private static MongoDatabase database;
 
-    // Connection method
     public static void connect(String connectionString, String databaseName) {
-        try {
-            ServerApi serverApi = ServerApi.builder().version(ServerApiVersion.V1).build();
-            MongoClientSettings settings = MongoClientSettings.builder()
-                    .applyConnectionString(new ConnectionString(connectionString))
-                    .serverApi(serverApi)
-                    .build();
-            mongoClient = MongoClients.create(settings);
-            database = mongoClient.getDatabase(databaseName);  // ✅ Devuelve MongoDatabase correctamente
-            System.out.println("Conectado a MongoDB!");
-        } catch (MongoException e) {
-            System.err.println("Error en la conexión: " + e.getMessage());
-            throw new RuntimeException("MongoDB connection failed", e);
+        if (mongoClient == null) {
+            try {
+                ServerApi serverApi = ServerApi.builder().version(ServerApiVersion.V1).build();
+                MongoClientSettings settings = MongoClientSettings.builder()
+                        .applyConnectionString(new ConnectionString(connectionString))
+                        .serverApi(serverApi)
+                        .build();
+                mongoClient = MongoClients.create(settings);
+                database = mongoClient.getDatabase(databaseName);
+                System.out.println("✅ Conectado a MongoDB!");
+            } catch (MongoException e) {
+                throw new RuntimeException("❌ MongoDB connection failed", e);
+            }
         }
     }
-    // Close connection
+
     public static void closeConnection() {
         if (mongoClient != null) {
             mongoClient.close();
+            System.out.println("🔌 Conexión cerrada.");
         }
     }
 
-    // CRUD for Llibres (Books)
-    public static class LlibreDAO {
+    public static MongoDatabase getDatabase() {
+        if (database == null) {
+            throw new IllegalStateException("❌ La base de datos no está inicializada.");
+        }
+        return database;
+    }
 
-        private static MongoCollection<Document> collection;
+    public static class llibreDAO {
+        private MongoCollection<Document> collection;
 
-        public LlibreDAO(String collectionName) {
-            collection = database.getCollection(collectionName);
+        public llibreDAO(String collectionName) {
+            if (MongoDBConnectionManager.getDatabase() == null) {
+                throw new IllegalStateException("❌ La base de datos no está inicializada.");
+            }
+            this.collection = MongoDBConnectionManager.getDatabase().getCollection(collectionName);
         }
 
-        // Create
         public String create(Llibre llibre) {
             Document doc = new Document("isbn", llibre.getIsbn())
                     .append("titol", llibre.getTitol())
@@ -64,19 +72,17 @@ public class MongoDBConnectionManager {
                     .append("descripcio", llibre.getDescripcio())
                     .append("paraulesClau", llibre.getParaulesClau())
                     .append("dataAfegit", new Date())
-                    .append("estat", "disponible");
+                    .append("estat", llibre.getEstat());
 
             collection.insertOne(doc);
             return doc.getObjectId("_id").toString();
         }
 
-        // Read One
         public Llibre findById(String id) {
             Document doc = collection.find(new Document("_id", new ObjectId(id))).first();
             return doc != null ? documentToLlibre(doc) : null;
         }
 
-        // Read All
         public List<Llibre> findAll() {
             List<Llibre> llibres = new ArrayList<>();
             for (Document doc : collection.find()) {
@@ -85,7 +91,6 @@ public class MongoDBConnectionManager {
             return llibres;
         }
 
-        // Update
         public long update(String id, Llibre llibre) {
             Document updateDoc = new Document("$set", new Document()
                     .append("titol", llibre.getTitol())
@@ -98,12 +103,25 @@ public class MongoDBConnectionManager {
             ).getModifiedCount();
         }
 
-        // Delete
         public long delete(String id) {
             return collection.deleteOne(new Document("_id", new ObjectId(id))).getDeletedCount();
         }
 
-        // Helper method to convert Document to Llibre
+        public List<Llibre> findByDate(String date) {
+            List<Llibre> result = new ArrayList<>();
+            try {
+                Date parsedDate = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(date);
+                Document query = new Document("dataAfegit", new Document("$gte", parsedDate));
+                
+                for (Document doc : collection.find(query)) {
+                    result.add(documentToLlibre(doc));
+                }
+            } catch (Exception e) {
+                System.out.println("❌ Error al convertir la fecha: " + e.getMessage());
+            }
+            return result;
+        }
+
         private Llibre documentToLlibre(Document doc) {
             Llibre llibre = new Llibre();
             llibre.setId(doc.getObjectId("_id").toString());
@@ -111,27 +129,12 @@ public class MongoDBConnectionManager {
             llibre.setTitol(doc.getString("titol"));
             llibre.setAutor(doc.getString("autor"));
             llibre.setAnyPublicacio(doc.getInteger("anyPublicacio"));
-            
-            // Safe type casting
-            List<String> generes = doc.getList("generes", String.class);
-            llibre.setGeneres(generes != null ? generes : new ArrayList<>());
-            
+            llibre.setGeneres(doc.getList("generes", String.class));
             llibre.setDescripcio(doc.getString("descripcio"));
-            
-            // Safe type casting
-            List<String> paraulesClau = doc.getList("paraulesClau", String.class);
-            llibre.setParaulesClau(paraulesClau != null ? paraulesClau : new ArrayList<>());
-            
+            llibre.setParaulesClau(doc.getList("paraulesClau", String.class));
             llibre.setDataAfegit(doc.getDate("dataAfegit"));
             llibre.setEstat(doc.getString("estat"));
             return llibre;
         }
     }
-
-    public static MongoDatabase getDatabase() {
-        return database;  // ✅ Asegúrate de que devuelve un MongoDatabase, no un Object
-    }
-
-
-    }
-
+}
