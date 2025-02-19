@@ -1,5 +1,6 @@
 package com.practica;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,9 +33,9 @@ public class MongoDBConnectionManager {
                         .build();
                 mongoClient = MongoClients.create(settings);
                 database = mongoClient.getDatabase(databaseName);
-                System.out.println("✅ Conectado a MongoDB!");
+                System.out.println("Conectado a MongoDB!");
             } catch (MongoException e) {
-                throw new RuntimeException("❌ MongoDB connection failed", e);
+                throw new RuntimeException("MongoDB connection failed", e);
             }
         }
     }
@@ -48,7 +49,7 @@ public class MongoDBConnectionManager {
 
     public static MongoDatabase getDatabase() {
         if (database == null) {
-            throw new IllegalStateException("❌ La base de datos no está inicializada.");
+            throw new IllegalStateException("La base de datos no está inicializada.");
         }
         return database;
     }
@@ -58,7 +59,7 @@ public class MongoDBConnectionManager {
 
         public llibreDAO(String collectionName) {
             if (MongoDBConnectionManager.getDatabase() == null) {
-                throw new IllegalStateException("❌ La base de datos no está inicializada.");
+                throw new IllegalStateException("La base de datos no está inicializada.");
             }
             this.collection = MongoDBConnectionManager.getDatabase().getCollection(collectionName);
         }
@@ -116,8 +117,8 @@ public class MongoDBConnectionManager {
                 for (Document doc : collection.find(query)) {
                     result.add(documentToLlibre(doc));
                 }
-            } catch (Exception e) {
-                System.out.println("❌ Error al convertir la fecha: " + e.getMessage());
+            } catch (ParseException e) {
+                System.out.println("Error al convertir la fecha: " + e.getMessage());
             }
             return result;
         }
