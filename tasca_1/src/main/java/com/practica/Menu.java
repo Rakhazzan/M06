@@ -16,7 +16,7 @@ public class Menu {
             System.out.println("3. Cercar per ID");
             System.out.println("4. Actualitzar llibre");
             System.out.println("5. Eliminar llibre");
-            System.out.println("6. Cercar per data");  // Nueva opción
+            System.out.println("6. Cercar per data"); 
             System.out.println("7. Sortir");
             System.out.print("Opció: ");
             int opcio = scanner.nextInt(); scanner.nextLine();
@@ -103,15 +103,15 @@ public class Menu {
                     System.out.println("Llibre eliminat!");
                 }
                 case 6 -> {
-                    System.out.print("📅 Introdueix la data (format: YYYY-MM-DD): ");
+                    System.out.print(" Introdueix la data (format: YYYY-MM-DD): ");
                     String dataStr = scanner.nextLine();
 
                     List<Llibre> llibres = llibreDAO.findByDate(dataStr);
 
                     if (llibres.isEmpty()) {
-                        System.out.println("❌ No s'han trobat llibres per aquesta data.");
+                        System.out.println(" No s'han trobat llibres per aquesta data.");
                     } else {
-                        System.out.println("📚 Llibres trobats:");
+                        System.out.println("Llibres trobats:");
                         for (Llibre llibre : llibres) {
                             System.out.println("Títol: " + llibre.getTitol());
                             System.out.println("Autor: " + llibre.getAutor());
@@ -121,7 +121,7 @@ public class Menu {
                     }
                 }
                 case 7 -> {
-                    System.out.println("👋 Sortint...");
+                    System.out.println("Sortint...");
                     scanner.close();
                     MongoDBConnectionManager.closeConnection();
                     return;
