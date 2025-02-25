@@ -43,7 +43,7 @@ public class MongoDBConnectionManager {
     public static void closeConnection() {
         if (mongoClient != null) {
             mongoClient.close();
-            System.out.println("🔌 Conexión cerrada.");
+            System.out.println("Conexión cerrada.");
         }
     }
 
