@@ -2,10 +2,11 @@ package com.practica;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,12 +24,12 @@ public class ApiClient {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:3030/add"))
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(book.toJson()))
+            .header("Content-Type", "application/json; charset=UTF-8")
+            .POST(HttpRequest.BodyPublishers.ofString(book.toJson(), StandardCharsets.UTF_8))
             .build();
         
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             System.out.println(response.body());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -40,10 +41,11 @@ public class ApiClient {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:3030/list"))
+                    .header("Accept", "application/json; charset=UTF-8")
                     .GET()
                     .build();
 
-            CompletableFuture<HttpResponse<String>> responseFuture = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+            CompletableFuture<HttpResponse<String>> responseFuture = client.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
             responseFuture.thenAccept(response -> {
                 String responseBody = response.body();
@@ -53,30 +55,51 @@ public class ApiClient {
                 JSONArray jsonArray = new JSONArray(responseBody);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Book book = new Book();
-                    book.setTitle(jsonObject.getString("titol"));
-                    book.setAuthor(jsonObject.getString("autor"));
+                    Book book = new Book(
+                        jsonObject.getString("isbn"),
+                        jsonObject.getString("titol"),
+                        jsonObject.getString("autor"),
+                        jsonObject.getInt("anyPublicacio"),
+                        jsonObject.getJSONArray("generes").toList(),
+                        jsonObject.getString("descripcio"),
+                        jsonObject.getJSONArray("paraulesClau").toList(),
+                        jsonObject.getString("estat"),
+                        jsonObject.getJSONObject("dataAfegit").getString("$date")
+                    );
                 }
             }).exceptionally(e -> {
                 e.printStackTrace();
                 return null;
             });
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private static Book bookForm() {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
         System.out.println("#############################");
         System.out.println("Add Book form: \n\n");
 
+        System.out.print("Enter ISBN: ");
+        String isbn = scanner.nextLine();
+        
         System.out.print("Enter title: ");
         String title = scanner.nextLine();
 
         System.out.print("Enter author: ");
         String author = scanner.nextLine();
-        return new Book(title, author);
         
+        System.out.print("Enter publication year: ");
+        int year = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.print("Enter description: ");
+        String description = scanner.nextLine();
+        
+        System.out.print("Enter status: ");
+        String status = scanner.nextLine();
+
+        return new Book(isbn, title, author, year, List.of(), description, List.of(), status, "");
     }
 }
