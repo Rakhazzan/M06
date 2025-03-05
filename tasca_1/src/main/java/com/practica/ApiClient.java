@@ -14,6 +14,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ApiClient {
+    private static final String BASE_URL = "https://m6-uf-3-api-phi.vercel.app";
+
     public static void main(String[] args) {
         Book book = bookForm();
         sendBook(book);
@@ -23,8 +25,9 @@ public class ApiClient {
     private static void sendBook(Book book) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://localhost:3030/add"))
+            .uri(URI.create(BASE_URL + "/add"))
             .header("Content-Type", "application/json; charset=UTF-8")
+            .header("Accept", "application/json; charset=UTF-8")
             .POST(HttpRequest.BodyPublishers.ofString(book.toJson(), StandardCharsets.UTF_8))
             .build();
         
@@ -40,7 +43,7 @@ public class ApiClient {
         try {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:3030/list"))
+                    .uri(new URI(BASE_URL + "/list"))
                     .header("Accept", "application/json; charset=UTF-8")
                     .GET()
                     .build();
